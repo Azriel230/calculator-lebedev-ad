@@ -302,7 +302,7 @@ int main(int argc, char **argv)
     fgets(input, 1024, stdin);
 
     int error_flag = validateInput(input);
-    if (error_flag == -1)
+    if (error_flag == 2)
     {
         free(input);
         return 2; // input error
