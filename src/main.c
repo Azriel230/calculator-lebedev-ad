@@ -226,60 +226,69 @@ Number calculatingExpression(char *input)
 int validateInput(char *input)
 {
     int length = strlen(input);
-    int last_was_operator = 1;
-    int balance = 0;
+    int last_was_operator = 1; // 1 - ожидаем число или открывающую скобку, 0 - ожидаем оператор или закрывающую скобку
+    int balance = 0; // Счетчик для проверки баланса скобок
 
     for (int i = 0; i < length; i++)
     {
         char c = input[i];
         if (isspace(c))
         {
-            continue;
+            continue; // Пропускаем пробелы
         }
         else if (isdigit(c))
         {
             if (!last_was_operator)
             {
-                return 2;
+                return 2; // Ошибка: две цифры подряд (например, "1 2 3")
             }
-            last_was_operator = 0;
+            // Пропускаем все цифры числа
+            while (i < length && isdigit(input[i]))
+            {
+                i++;
+            }
+            i--; // Возвращаемся на один символ назад, так как цикл for тоже увеличивает i
+            last_was_operator = 0; // После числа ожидаем оператор или закрывающую скобку
         }
         else if (c == '+' || c == '-' || c == '*' || c == '/')
         {
             if (last_was_operator)
             {
-                return 2;
+                return 2; // Ошибка: два оператора подряд (например, "1 +- 2")
             }
-            last_was_operator = 1;
+            last_was_operator = 1; // После оператора ожидаем число или открывающую скобку
         }
         else if (c == '(')
         {
             if (!last_was_operator)
             {
-                return 2;
+                return 2; // Ошибка: после числа или закрывающей скобки не может быть открывающей скобки (например, "1 (2 + 3)")
             }
             balance++;
-            last_was_operator = 1;
+            last_was_operator = 1; // После открывающей скобки ожидаем число или открывающую скобку
         }
         else if (c == ')')
         {
             if (last_was_operator || balance == 0)
             {
-                return 2;
+                return 2; // Ошибка: закрывающая скобка без открывающей или после оператора (например, "1 + 2)")
             }
             balance--;
-            last_was_operator = 1;
+            last_was_operator = 0; // После закрывающей скобки ожидаем оператор или закрывающую скобку
         }
         else
         {
-            return 2;
+            return 2; // Ошибка: недопустимый символ
         }
     }
 
+    // Проверяем, что баланс скобок сбалансирован и последний символ не был оператором
     if (last_was_operator || balance != 0)
-        return 2;
+    {
+        return 2; // Ошибка: несбалансированные скобки или выражение заканчивается оператором
+    }
 
-    return 1;
+    return 1; // Выражение корректно
 }
 
 #ifndef GTEST

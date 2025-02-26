@@ -30,6 +30,7 @@ build/unit-tests.exe: build/gtest/gtest_main.a build/app-test.o
 	g++ -isystem $(GTEST_DIR)/include -pthread \
 		tests/unit/stack_test.cpp \
 		tests/unit/operations_test.cpp \
+		tests/unit/validate_input_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
 		-o build/unit-tests.exe
 
