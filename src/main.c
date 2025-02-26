@@ -106,7 +106,8 @@ Number applyOperation(Number a, Number b, char oper)
             if (b.float_value >= -1e-4 && b.float_value <= 1e-4)
             {
                 printf("Operation error! Division by float zero!\n");
-                exit(1); //надо будет чистить память у указателей, потом целесообразно будет сделать функцию exit, в которой все подчистить
+                exit(1); // надо будет чистить память у указателей, потом целесообразно будет сделать функцию exit, в
+                         // которой все подчистить
             }
             else
                 result.float_value = a.float_value / b.float_value;
@@ -224,45 +225,61 @@ Number calculatingExpression(char *input)
 
 int validateInput(char *input)
 {
-    // char prevOper;
-    // int brackets;
-    while (*input)
+    int length = strlen(input);
+    int last_was_operator = 1;
+    int balance = 0;
+
+    for (int i = 0; i < length; i++)
     {
-        char c = *input;
-
-        if (isdigit(c))
+        char c = input[i];
+        if (isspace(c))
         {
-            input++;
             continue;
         }
-
-        if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
+        else if (isdigit(c))
         {
-            input++;
-            continue;
+            if (!last_was_operator)
+            {
+                return 2;
+            }
+            last_was_operator = 0;
         }
-
-        if (c == '(' || c == ')' || c == '+' || c == '-' || c == '*' || c == '/')
+        else if (c == '+' || c == '-' || c == '*' || c == '/')
         {
-            // if (c == '(')
-            //     brackets++;
-
-            // if (c == ')')
-            // {
-            //     if (brackets < 0)
-            //         return -1;
-            //     brackets--;
-            // }
-
-            // prevOper = c;
-            input++;
-            continue;
+            if (last_was_operator)
+            {
+                return 2;
+            }
+            last_was_operator = 1;
         }
-
-        return -1;
+        else if (c == '(')
+        {
+            if (!last_was_operator)
+            {
+                return 2;
+            }
+            balance++;
+            last_was_operator = 1;
+        }
+        else if (c == ')')
+        {
+            if (last_was_operator || balance == 0)
+            {
+                return 2;
+            }
+            balance--;
+            last_was_operator = 1;
+        }
+        else
+        {
+            return 2;
+        }
     }
 
-    return 0;
+    if (last_was_operator || balance != 0)
+        return 2;
+
+    return 1;
 }
 
 #ifndef GTEST

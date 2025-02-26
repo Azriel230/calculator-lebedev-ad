@@ -72,7 +72,7 @@ TEST(operationsTests, applyOper_test)
     result = applyOperation(a,b,mult);
     EXPECT_EQ(abmult, result.float_value);
     // result = applyOperation(a,b,division);
-    // EXPECT_EQ(abdiv, result.float_value);
+    // EXPECT_LT(abs(abdiv - result.float_value), 1e-4);
 
     EXPECT_EXIT(applyOperation(a,zero,division), testing::ExitedWithCode(1), "");
 }
