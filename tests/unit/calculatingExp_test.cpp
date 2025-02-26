@@ -12,5 +12,8 @@ extern "C" {
 
 TEST(calculatingExpTestss, calculatingExp_test)
 {
-    
+    flag_float = 0;
+    char input1[] = "(2+3)+(1+4)*(1-3)";
+    Number result = calculatingExpression(input1);
+    EXPECT_EQ(-5, result.int_value);
 }
