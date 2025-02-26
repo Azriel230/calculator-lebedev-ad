@@ -1,3 +1,8 @@
 *.exe
 *.env
 *.sh
+googletest/
+build/
+__pycache__/
+.vscode
+.qodo
