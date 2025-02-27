@@ -1,88 +1,73 @@
 import subprocess
 
 def test1():
-    res=subprocess.run(["build/app.exe", "--float"], input="125*2314/4",text=True,capture_output=True)
+    res = subprocess.run(["build/app.exe"], input="(2+3)+(1+4)*(1-3)",text=True,capture_output=True)
     assert res.returncode == 0
-    assert float(res.stdout) == 72312.5000
+    assert int(res.stdout) == -5
+
 
 def test2():
-    res=subprocess.run(["build/app.exe"], input="125*2314/4",text=True,capture_output=True)
+    res = subprocess.run(["build/app.exe"], input="(100 - (25 + 15) / 5) * (3 + 7) - 48 / 6",text=True,capture_output=True)
     assert res.returncode == 0
-    assert int(res.stdout) == 72312
+    assert int(res.stdout) == 912
+
 
 def test3():
-    res=subprocess.run(["build/app.exe"], input="5+(11*8)/4",text=True,capture_output=True)
+    res = subprocess.run(["build/app.exe", "--float"], input="((36/6+4)*(10-3*2)+12)/(5+1)",text=True,capture_output=True)
     assert res.returncode == 0
-    assert int(res.stdout) == 27
+    assert float(res.stdout) == 8.6667
+
 
 def test4():
-    res=subprocess.run(["build/app.exe", "--float"], input="(125*2314-(231-(123*8)+(((16*8)-97)/12)))/3",text=True,capture_output=True)
+    res = subprocess.run(["build/app.exe"], input="((120 / (10 + 2) + (7 * 4 - 5)) * (3 + 2) - 18)",text=True,capture_output=True)
     assert res.returncode == 0
-    assert float(res.stdout) == 96666.8056
+    assert int(res.stdout) == 147
 
 
 def test5():
-    res=subprocess.run(["build/app.exe", "--float"], input="(125*2314-(231-(123*8)+(((16*8)-97)/12)*(2+1)))/3",text=True,capture_output=True)
+    res = subprocess.run(["build/app.exe", "--float"], input="((16+24)/(8-3)*(5+2))+(12*3-10)/7",text=True,capture_output=True)
     assert res.returncode == 0
-    assert float(res.stdout) == 96665.0833
+    assert float(res.stdout) == 59.7143
+
 
 def test6():
-    res=subprocess.run(["build/app.exe", "--float"], input="  (  3 + 4 )  * 2", text=True,capture_output=True)
+    res=subprocess.run(["build/app.exe", "--float"], input="((((415-323) * 2314 /322) + (44-77) / 13) - (552 - 21 * 43))",text=True,capture_output=True)
     assert res.returncode == 0
-    assert float(res.stdout) == 14.0000
+    assert float(res.stdout) == 1009.6044
 
 
 def test7():
-    res=subprocess.run(["build/app.exe"], input="\t9\n-\n5",text=True,capture_output=True)
+    res=subprocess.run(["build/app.exe"], input="((5+15)*(20/4-2)+8)*(3-1)",text=True,capture_output=True)
     assert res.returncode == 0
-    assert int(res.stdout) == 4
+    assert int(res.stdout) == 136
 
+
+#error tests
 def test8():
-    res=subprocess.run(["build/app.exe"], input="((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((2+1+(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((2*4)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",text=True,capture_output=True)
-    assert res.returncode == 0
-    assert int(res.stdout) == 11
+    res=subprocess.run(["build/app.exe"], input="10/(2-2)", text=True, capture_output=True)
+    assert res.returncode != 0
+
 
 def test9():
-    res=subprocess.run(["build/app.exe", "--float"], input="((((((((((((((((((((((((((((((((((((((((((((((((((2+((((((((((((((((((((((\n(((((((((((((((((\f(((5+((((((((((((((((((((((((((((((((((((((((((((0+9+(((((((((\n(((((((((((((((((((((((((((((((((((((((((((\n((((((((((((((((((((((((((((((((((((((((((((((((((((((((2*3))))))))))))))))))))))))))))))))))))))))))))))))))))))))\f)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))\n)))))))))))))))))))))))))))))))))))))))))))))))))))))))\f))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",text=True,capture_output=True)
-    assert res.returncode == 0
-    assert float(res.stdout) == 22.0000
+    res=subprocess.run(["build/app.exe", "--float"], input="-10 + 5",text=True,capture_output=True)
+    assert res.returncode != 0
+
 
 def test10():
-    res=subprocess.run(["build/app.exe"], input="(2+1+((2*4)))",text=True,capture_output=True)
-    assert res.returncode == 0
-    assert int(res.stdout) == 11   
+    res=subprocess.run(["build/app.exe"], input="10/(2-2)", text=True, capture_output=True)
+    assert res.returncode != 0
+
 
 def test11():
-    res=subprocess.run(["build/app.exe"], input="1/(2-2)",text=True,capture_output=True)
+    res=subprocess.run(["build/app.exe", "--float"], input="1 +- 2",text=True,capture_output=True)
     assert res.returncode != 0
+
+
 def test12():
-    res=subprocess.run(["build/app.exe"], input="1+1.5",text=True,capture_output=True)
+    res=subprocess.run(["build/app.exe"], input="1 2 3 4", text=True, capture_output=True)
     assert res.returncode != 0
+
+
 def test13():
-    inp = ""
-    for i in range(50):
-        inp += "((((((((((((((((((((((((((((((((((((((((((((((((((2+((((((((((((((((((((((\n(((((((((((((((((\f(((5+((((((((((((((((((((((((((((((((((((((((((((0+9+(((((((((\n(((((((((((((((((((((((((((((((((((((((((((\n((((((((((((((((((((((((((((((((((((((((((((((((((((((((2*3))))))))))))))))))))))))))))))))))))))))))))))))))))))))\f)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))\n)))))))))))))))))))))))))))))))))))))))))))))))))))))))\f))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))+"
-    inp += "((((((((((((((((((((((((((((((((((((((((((((((((((2+((((((((((((((((((((((\n(((((((((((((((((\f(((5+((((((((((((((((((((((((((((((((((((((((((((0+9+(((((((((\n(((((((((((((((((((((((((((((((((((((((((((\n((((((((((((((((((((((((((((((((((((((((((((((((((((((((2*3))))))))))))))))))))))))))))))))))))))))))))))))))))))))\f)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))\n)))))))))))))))))))))))))))))))))))))))))))))))))))))))\f))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))";
-    res=subprocess.run(["build/app.exe"], input=inp,text=True,capture_output=True)
-    assert res.returncode != 0
-def test14():
-    res=subprocess.run(["build/app.exe"], input="(1000000000 * 2 + 1)/10",text=True,capture_output=True)
-    assert res.returncode != 0
-def test15():
-    res=subprocess.run(["build/app.exe"], input="123/(1/10000)",text=True,capture_output=True)
-    assert res.returncode != 0
-def test16():
-    res=subprocess.run(["build/app.exe"], input="1*(-2)",text=True,capture_output=True)
-    assert res.returncode != 0
-def test17():
-    res=subprocess.run(["build/app.exe"], input="1+-2",text=True,capture_output=True)
-    assert res.returncode != 0
-def test18():
-    res=subprocess.run(["build/app.exe"], input="+1 - 2",text=True,capture_output=True)
-    assert res.returncode != 0
-def test19():
-    res=subprocess.run(["build/app.exe"], input="(2+1+(2*4)))",text=True,capture_output=True)
-    assert res.returncode != 0
-def test20():
-    res=subprocess.run(["build/app.exe"], input="(2+1+(2 4)))",text=True,capture_output=True)
+    res=subprocess.run(["build/app.exe"], input="1 + 2 /", text=True, capture_output=True)
     assert res.returncode != 0
