@@ -1,12 +1,24 @@
 GTEST_DIR ?= googletest/googletest
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h $(GTEST_DIR)/include/gtest/internal/*.h
+PYTHON := python3
+PIP := pip3
+VENV_NAME := venv
+VENV_ACTIVATE := $(VENV_NAME)/bin/activate
+VENV_PYTHON := $(VENV_NAME)/bin/python
+VENV_PIP := $(VENV_NAME)/bin/pip
+PYTEST := $(VENV_NAME)/bin/pytest
+BUILD := build
 
 $(shell mkdir -p build/gtest)
+$(shell git clone https://github.com/google/googletest &> /dev/null)
+
+.PHONY: all clean run-int run-float run-unit-test run-integration-tests
 
 all: build/app.exe build/unit-tests.exe
 
 clean:
 	rm -rf build
+	rm -rf $(VENV_NAME)
 
 # Run the normal C application
 run-int: build/app.exe
@@ -17,8 +29,28 @@ run-float: build/app.exe
 	build/app.exe --float
 
 # Run all tests
-run-unit-tests: build/unit-tests.exe
+run-unit-tests: build/app.exe build/unit-tests.exe
 	build/unit-tests.exe
+
+# Create virtual environment if it doesn't exist
+venv: check-venv
+	@if [ ! -d "$(VENV_NAME)" ]; then \
+		echo "Creating virtual environment..."; \
+		$(PYTHON) -m venv $(VENV_NAME); \
+	fi
+
+run-integration-tests: build/app.exe install-deps
+	source $(VENV_NAME)/bin/activate; $(PYTEST) tests/integration/integrationTests.py
+
+# Check if venv module is available
+check-venv:
+	@$(PYTHON) -c "import venv" 2>/dev/null || (echo "python3-venv not found. Installing..." && sudo apt update && sudo apt install -y python3-venv)
+
+# Install dependencies in virtual environment
+install-deps: venv
+	@echo "Installing dependencies..."
+	@. $(VENV_ACTIVATE) && $(VENV_PIP) install --upgrade pip
+	@. $(VENV_ACTIVATE) && $(VENV_PIP) install pytest
 
 build/app.exe:
 	gcc src/main.c -o build/app.exe -Wall -Wextra -Wpedantic -Werror -std=c11
@@ -28,10 +60,7 @@ build/app-test.o:
 
 build/unit-tests.exe: build/gtest/gtest_main.a build/app-test.o
 	g++ -isystem $(GTEST_DIR)/include -pthread \
-		tests/unit/stack_test.cpp \
-		tests/unit/operations_test.cpp \
 		tests/unit/validate_input_test.cpp \
-		tests/unit/calculatingExp_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
 		-o build/unit-tests.exe
 

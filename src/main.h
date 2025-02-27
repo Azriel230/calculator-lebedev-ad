@@ -1,3 +1,3 @@
-#define STACK_SIZE 1000
+#define STACK_SIZE 10000
 
 extern int flag_float;

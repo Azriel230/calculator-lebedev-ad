@@ -25,4 +25,6 @@ TEST(validateInputTests, validateInput_test)
     EXPECT_EQ(1, validateInput(input7));
     char input8[] = "(2+3)+(1+4)*(1-3)";
     EXPECT_EQ(1, validateInput(input8));
+    char input9[] = "\t9\n-\n5";
+    EXPECT_EQ(1, validateInput(input9));
 }

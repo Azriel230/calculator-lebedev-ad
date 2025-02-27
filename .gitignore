@@ -3,6 +3,8 @@
 *.sh
 googletest/
 build/
-__pycache__/
 .vscode
 .qodo
+venv/
+.pytest_cache/
+__pycache__/

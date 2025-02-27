@@ -40,7 +40,10 @@ void pushStack(Stack *stack, Number item)
         stack->data[stack->top] = item;
     }
     else
+    {
         printf("Push error! Stack is full.\n");
+        exit(5);
+    }
 }
 
 Number popStack(Stack *stack)
@@ -54,8 +57,7 @@ Number popStack(Stack *stack)
     else
     {
         printf("Pop error! Stack is empty.\n");
-        Number empty = {0};
-        return empty;
+        exit(5);
     }
 }
 
@@ -66,9 +68,30 @@ Number peekStack(Stack *stack)
     else
     {
         printf("Peek error! Stack is empty.\n");
-        Number empty = {0};
-        return empty;
+        exit(5);
     }
+}
+
+int checkNumberSize(Number number)
+{
+    if (flag_float)
+    {
+        if (number.float_value > 2000000000 || number.float_value < -2000000000)
+        {
+            printf("error! number size is over 2000000000");
+            exit(4);
+        }
+    }
+    else
+    {
+        if (number.int_value > 2000000000 || number.int_value < -2000000000)
+        {
+            printf("error! number size is over 2000000000");
+            exit(4);
+        }    
+    }
+
+    return 0;
 }
 
 int priorityOperations(char oper)
@@ -138,6 +161,7 @@ Number applyOperation(Number a, Number b, char oper)
             break;
         }
     }
+    checkNumberSize(result);
     return result;
 }
 
@@ -176,6 +200,7 @@ Number calculatingExpression(char *input)
                 }
                 number.int_value = value;
             }
+            checkNumberSize(number);
             pushStack(&numbers, number);
             i--;
         }
@@ -295,24 +320,25 @@ int main(int argc, char **argv)
 {
     for (int i = 0; i < argc; i++)
     {
-        printf("argv[%d] = %s\n", i, argv[i]);
+        //printf("argv[%d] = %s\n", i, argv[i]);
         if (strcmp(argv[i], "--float") == 0)
             flag_float = 1;
     }
 
-    char *input = malloc(1024);
-    if (input == NULL)
+    char input[1024];
+    char c;
+    int index = 0;
+    while ((c = getchar()) != EOF && index < 1024)
     {
-        printf("Memory allocation error!\n");
-        return 3;
+        input[index] = c;
+        index++;
     }
-
-    fgets(input, 1024, stdin);
+    input[index] = '\0';
 
     int error_flag = validateInput(input);
     if (error_flag == 2)
     {
-        free(input);
+        printf("Input error!\n");
         return 2; // input error
     }
 
@@ -322,7 +348,6 @@ int main(int argc, char **argv)
     else
         printf("%ld\n", result.int_value);
 
-    free(input);
     return 0;
 }
 #endif
