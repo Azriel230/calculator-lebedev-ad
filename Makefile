@@ -31,6 +31,10 @@ run-float: build/app.exe
 run-unit-tests: build/app.exe build/unit-tests.exe
 	build/unit-tests.exe
 
+# Run python http server
+run-server: build/app.exe
+	$(PYTHON) src/server.py
+
 # Create virtual environment if it doesn't exist
 venv: check-venv
 	@if [ ! -d "$(VENV_NAME)" ]; then \
