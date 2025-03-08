@@ -21,6 +21,28 @@ if not os.path.exists(LOG_DIR):
 
 # Настройка structlog для логирования в консоль и в файл
 def setup_logging():
+    # Настройка structlog
+    structlog.configure(
+        processors=[
+            structlog.stdlib.add_log_level,  # Добавляет уровень логирования
+            structlog.processors.StackInfoRenderer(),  # Добавляет информацию о стеке
+            structlog.processors.TimeStamper(fmt="iso"), # Добавляет временную метку в формате iso
+            structlog.processors.format_exc_info, # Добавляет информацию об исключениях
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter, # Подготавливает данные для форматирования
+        ],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        cache_logger_on_first_use=True,
+    )
+
+    main_logger = logging.getLogger()
+    main_logger.setLevel(logging.INFO)
+
+    # Обработчик для вывода в консоль
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(structlog.stdlib.ProcessorFormatter(
+        processor=structlog.dev.ConsoleRenderer(colors=True),
+    ))
+
     # Путь к файлу логов
     log_file_path = os.path.join(LOG_DIR, "server.log")
 
@@ -28,27 +50,11 @@ def setup_logging():
     file_handler = logging.handlers.RotatingFileHandler(
         log_file_path, maxBytes=1024 * 1024, backupCount=5  # Логи ротируются при достижении 1 МБ
     )
-    file_handler.setFormatter(logging.Formatter("%(message)s"))
-    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(structlog.stdlib.ProcessorFormatter(processor=structlog.processors.JSONRenderer()))
 
-    # Настройка structlog
-    structlog.configure(
-        processors=[
-            structlog.processors.add_log_level,  # Добавляет уровень логирования
-            structlog.processors.StackInfoRenderer(),  # Добавляет информацию о стеке
-            structlog.dev.ConsoleRenderer(),  # Логирование в консоль
-            structlog.processors.JSONRenderer(),  # Логирование в JSON
-        ],
-        logger_factory=structlog.PrintLoggerFactory(),
-        wrapper_class=structlog.BoundLogger,
-        cache_logger_on_first_use=True,
-    )
+    main_logger.addHandler(console_handler)
+    main_logger.addHandler(file_handler)
 
-    # Добавляем file_handler в logging
-    logging.basicConfig(
-        level=logging.INFO,
-        handlers=[file_handler],
-    )
 
 setup_logging()
 logger = structlog.get_logger()
