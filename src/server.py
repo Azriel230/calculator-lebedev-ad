@@ -92,7 +92,14 @@ class CalculatorHandler(BaseHTTPRequestHandler):
                 post_data = self.rfile.read(length)
                 # Парсим JSON
                 data = json.loads(post_data)
-                expression = data.strip()
+
+                # Обрабатываем данные в зависимости от их типа
+                if isinstance(data, dict):  # Если данные — это словарь
+                    expression = data.get("expression", "").strip()  # Извлекаем выражение из словаря
+                elif isinstance(data, str):  # Если данные — это строка
+                    expression = data.strip()  # Используем строку как есть
+                else:
+                    raise ValueError("Invalid data type. Expected string or dictionary.")
 
                 # Логируем полученное выражение
                 logger.info("Expression received", expression=expression)

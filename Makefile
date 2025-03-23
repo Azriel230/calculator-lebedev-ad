@@ -35,6 +35,22 @@ run-unit-tests: build/app.exe build/unit-tests.exe
 run-server: build/app.exe
 	$(PYTHON) src/server.py
 
+# Run python http server background and python gui
+run-app: build/app.exe
+	$(PYTHON) src/server.py & \
+	$(PYTHON) src/gui.py
+	$(MAKE) kill-server
+
+# Kill server if it online
+kill-server:
+	@SERVER_PID=$$(ps aux | grep "[p]ython.*src/server.py" | awk '{print $$2}'); \
+	if [ -n "$$SERVER_PID" ]; then \
+		echo "Stopping server (PID: $$SERVER_PID)..."; \
+		kill $$SERVER_PID; \
+	else \
+		echo "Server is not running."; \
+	fi
+
 # Create virtual environment if it doesn't exist
 venv: check-venv
 	@if [ ! -d "$(VENV_NAME)" ]; then \
