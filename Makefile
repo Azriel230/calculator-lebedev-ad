@@ -21,10 +21,10 @@ clean:
 	@rm -rf tests/integration/__pycache__
 
 run-int: build/app.exe
-	build/app.exe
+	@build/app.exe
 
 run-float: build/app.exe
-	build/app.exe --float
+	@build/app.exe --float
 
 run-integration-tests: build/app.exe venv tests/integration/integrationTests.py
 	@source $(VENV_ACTIVATE); $(PYTEST) tests/integration/integrationTests.py
