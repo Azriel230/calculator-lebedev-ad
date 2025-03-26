@@ -40,7 +40,7 @@ run-unit-tests: build/unit-tests
 	@build/cli_test.exe
 	@build/print_test.exe
 
-run-server: src/main.c venv src/server.py
+run-server: build/app.exe venv src/server.py
 	@source $(VENV_ACTIVATE); $(PYTHON) src/server.py
 
 run-gui: venv src/gui.py
