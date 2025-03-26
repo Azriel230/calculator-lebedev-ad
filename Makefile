@@ -8,10 +8,11 @@ PYTHON := python3
 PYTEST = $(VENV_DIR)/bin/pytest
 
 $(shell mkdir -p build/gtest)
+$(shell git clone https://github.com/google/googletest &> /dev/null)
 
 .PHONY: all clean run-int run-float run-unit-tests run-integration-tests build/unit-tests
 
-all: build/app.exe build/unit-tests
+all: build/app.exe venv build/unit-tests
 
 clean:
 	@echo "Cleaning..."
@@ -50,7 +51,7 @@ build/app.exe: src/main.c
 	@echo "Building app.exe..."
 	@$(CC) $(CFLAGS) -o build/app.exe src/main.c
 
-build/app-test.o: src/main.o
+build/app-test.o: src/main.c
 	@echo "Building app-test.o..."
 	@$(CC) $(CFLAGS) -DGTEST -c src/main.c -o build/app-test.o -g
 
@@ -66,21 +67,21 @@ venv:
 build/unit-tests: build/precedence_test.exe build/stack_test.exe build/queue_test.exe build/parse_test.exe build/calculate_test.exe build/cli_test.exe build/node_test.exe build/print_test.exe
 
 build/precedence_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/precedence_test.cpp
-	@echo "Building precedence unit-tests"
+	@echo "Building precedence unit-tests..."
 	@g++ -isystem $(GTEST_DIR)/include -pthread \
 		tests/unit/precedence_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
 		-o build/precedence_test.exe
 
 build/stack_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/stack_test.cpp
-	@echo "Building stack unit-tests"
+	@echo "Building stack unit-tests..."
 	@g++ -isystem $(GTEST_DIR)/include -pthread \
 		tests/unit/stack_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
 		-o build/stack_test.exe
 
 build/node_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/node_test.cpp
-	@echo "Building node unit-tests"
+	@echo "Building node unit-tests..."
 	@g++ -isystem $(GTEST_DIR)/include -pthread \
 		tests/unit/node_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
@@ -94,7 +95,7 @@ build/cli_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/cli_tes
 		-o build/cli_test.exe
 
 build/calculate_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/calculate_test.cpp
-	@echo "Building calculate unit-tests"
+	@echo "Building calculate unit-tests..."
 	@g++ -isystem $(GTEST_DIR)/include -pthread \
 		tests/unit/calculate_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
@@ -108,14 +109,14 @@ build/parse_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/parse
 		-o build/parse_test.exe -g
 
 build/queue_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/queue_test.cpp
-	@echo "Building queue unit-tests"
+	@echo "Building queue unit-tests..."
 	@g++ -isystem $(GTEST_DIR)/include -pthread \
 		tests/unit/queue_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
 		-o build/queue_test.exe
 
 build/print_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/print_test.cpp
-	@echo "Building print unit-tests"
+	@echo "Building print unit-tests..."
 	@g++ -isystem $(GTEST_DIR)/include -pthread \
 		tests/unit/print_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
