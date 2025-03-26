@@ -1,88 +1,111 @@
+#include <cstdlib>
 #include <gtest/gtest.h>
-#include "../../src/main.h"
-
+#include <stdlib.h>
 extern "C" {
-    typedef union {
-        long int_value;
-        double float_value;
-    } Number;
+typedef enum EType { INTEGER,
+    DOUBLE,
+    OPERATOR } EType;
 
-    typedef struct {
-        Number data[STACK_SIZE];
-        int top;
-    } Stack;
+typedef struct Node {
+    void* value;
+    EType type;
+    struct Node* next;
+} Node;
 
-    void initializeStack(Stack* stack);
-    int isEmptyStack(Stack* stack);
-    int isFullStack(Stack* stack);
-    void pushStack(Stack* stack, Number item);
-    Number popStack(Stack* stack);
-    Number peekStack(Stack* stack);
+typedef struct Stack {
+    Node* top;
+} Stack;
+
+Stack* newStack();
+void stackPush(Stack*, void*, EType);
+void stackPushNode(Stack*, Node*);
+Node* stackPop(Stack*);
+void nodeFree(Node*);
 }
 
-TEST(stackTests, initStack_test)
+TEST(StackTest, StackInit)
 {
-    Stack s;
-    initializeStack(&s);
-    EXPECT_EQ(-1, s.top);
+    Stack* s = newStack();
+    EXPECT_EQ(s->top, (void*)0);
+    free(s);
 }
 
-TEST(stackTests, isEmptyStack_test)
+TEST(StackTest, StackPush)
 {
-    Stack s;
-    initializeStack(&s);
-    EXPECT_EQ(1, isEmptyStack(&s));
-    Number item {10};
-    pushStack(&s, item);
-    EXPECT_EQ(0, isEmptyStack(&s));
+    void *v1 = malloc(sizeof(long)), *v2 = malloc(sizeof(char)), *v3 = malloc(sizeof(double));
+    *(long*)v1 = 1;
+    *(char*)v2 = 'c';
+    *(double*)v3 = 3.0;
+    auto s = newStack();
+    stackPush(s, v1, INTEGER);
+    stackPush(s, v2, OPERATOR);
+    stackPush(s, v3, DOUBLE);
+    ASSERT_NE(s->top, (void*)0);
+    EXPECT_EQ(s->top->value, v3);
+
+    ASSERT_NE(s->top->next, (void*)0);
+    EXPECT_EQ(s->top->next->value, v2);
+
+    ASSERT_NE(s->top->next->next, (void*)0);
+    EXPECT_EQ(s->top->next->next->value, v1);
+    nodeFree(stackPop(s));
+    nodeFree(stackPop(s));
+    nodeFree(stackPop(s));
+    free(s);
 }
 
-TEST(stackTests, isFullStack_test)
+TEST(StackTest, StackPop)
 {
-    Stack s;
-    initializeStack(&s);
-    EXPECT_EQ(0, isFullStack(&s));
-    for(int i = 0; i < STACK_SIZE; i++) {
-        Number item {i};
-        pushStack(&s, item);
-    }
-    EXPECT_EQ(1, isFullStack(&s));
+    void *v1 = malloc(sizeof(long)), *v2 = malloc(sizeof(char)), *v3 = malloc(sizeof(double));
+    *(long*)v1 = 1;
+    *(char*)v2 = 'c';
+    *(double*)v3 = 3.0;
+    auto s = newStack();
+    stackPush(s, v1, INTEGER);
+    stackPush(s, v2, OPERATOR);
+    stackPush(s, v3, DOUBLE);
+    auto n3 = stackPop(s);
+    auto n2 = stackPop(s);
+    auto n1 = stackPop(s);
+    stackPushNode(s, n1);
+    n1 = stackPop(s);
+    EXPECT_EQ(n1->value, v1);
+    EXPECT_EQ(n2->value, v2);
+    EXPECT_EQ(n3->value, v3);
+    nodeFree(n1);
+    nodeFree(n2);
+    nodeFree(n3);
+    free(s);
 }
 
-TEST(stackTests, pushStack_test)
+TEST(StackTest, StackPushNode)
 {
-    Stack s;
-    initializeStack(&s);
-    EXPECT_EQ(1, isEmptyStack(&s));
-    Number item {10};
-    pushStack(&s, item);
-    EXPECT_EQ(0, isEmptyStack(&s));
-    EXPECT_EQ(item.int_value, s.data[s.top].int_value);
-}
+    void *v1 = malloc(sizeof(long)), *v2 = malloc(sizeof(char)), *v3 = malloc(sizeof(double));
+    *(long*)v1 = 1;
+    *(char*)v2 = 'c';
+    *(double*)v3 = 3.0;
+    auto s = newStack();
+    stackPush(s, v1, INTEGER);
+    stackPush(s, v2, OPERATOR);
+    stackPush(s, v3, DOUBLE);
+    auto n3 = stackPop(s);
+    auto n2 = stackPop(s);
+    auto n1 = stackPop(s);
 
-TEST(stackTests, popStack_test)
-{
-    Stack s;
-    initializeStack(&s);
-    EXPECT_EQ(1, isEmptyStack(&s));
-    Number item {10};
-    pushStack(&s, item);
-    EXPECT_EQ(0, isEmptyStack(&s));
-    Number poped = popStack(&s);
-    EXPECT_EQ(item.int_value, poped.int_value);
-    EXPECT_EQ(1, isEmptyStack(&s));
-}
+    stackPushNode(s, n1);
+    stackPushNode(s, n2);
+    stackPushNode(s, n3);
 
-TEST(stackTests, peekStack_test)
-{
-    Stack s;
-    initializeStack(&s);
-    EXPECT_EQ(1, isEmptyStack(&s));
-    Number item {10};
-    pushStack(&s, item);
-    EXPECT_EQ(0, isEmptyStack(&s));
-    Number peeked = peekStack(&s);
-    EXPECT_EQ(item.int_value, peeked.int_value);
-    EXPECT_EQ(peeked.int_value, s.data[s.top].int_value);
-    EXPECT_EQ(0, isEmptyStack(&s));
+    ASSERT_NE(s->top, (void*)0);
+    EXPECT_EQ(s->top, n3);
+
+    ASSERT_NE(s->top->next, (void*)0);
+    EXPECT_EQ(s->top->next, n2);
+
+    ASSERT_NE(s->top->next->next, (void*)0);
+    EXPECT_EQ(s->top->next->next, n1);
+    nodeFree(stackPop(s));
+    nodeFree(stackPop(s));
+    nodeFree(stackPop(s));
+    free(s);
 }
