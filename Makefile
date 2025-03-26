@@ -1,99 +1,140 @@
-GTEST_DIR ?= googletest/googletest
-GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h $(GTEST_DIR)/include/gtest/internal/*.h
+GTEST_DIR := googletest/googletest
+GTEST_HEADERS := $(GTEST_DIR)/include/gtest/*.h $(GTEST_DIR)/include/gtest/internal/*.h
+CC := gcc
+CFLAGS := -Wall -Wextra -Wpedantic
+VENV_DIR := venv
+VENV_ACTIVATE := $(VENV_DIR)/bin/activate
 PYTHON := python3
-PIP := pip3
-VENV_NAME := venv
-VENV_ACTIVATE := $(VENV_NAME)/bin/activate
-VENV_PYTHON := $(VENV_NAME)/bin/python
-VENV_PIP := $(VENV_NAME)/bin/pip
-PYTEST := $(VENV_NAME)/bin/pytest
-BUILD := build
+PYTEST = $(VENV_DIR)/bin/pytest
 
 $(shell mkdir -p build/gtest)
 
-.PHONY: all clean run-int run-float run-unit-test run-integration-tests
+.PHONY: all clean run-int run-float run-unit-tests run-integration-tests build/unit-tests
 
-all: build/app.exe build/unit-tests.exe
+all: build/app.exe build/unit-tests
 
 clean:
-	rm -rf build
-	rm -rf $(VENV_NAME)
+	@echo "Cleaning..."
+	@rm -rf build/
+	@rm -rf $(VENV_DIR)
+	@rm -rf .pytest_cache
+	@rm -rf tests/integration/__pycache__
 
-# Run the normal C application
 run-int: build/app.exe
-	build/app.exe
+	@build/app.exe
 
-# Run the normal C application with floating point numbers
 run-float: build/app.exe
-	build/app.exe --float
+	@build/app.exe --float
 
-# Run all tests
-run-unit-tests: build/app.exe build/unit-tests.exe
-	build/unit-tests.exe
+run-integration-tests: build/app.exe venv tests/integration/integrationTests.py
+	@source $(VENV_ACTIVATE); $(PYTEST) tests/integration/integrationTests.py
 
-# Run python http server
-run-server: build/app.exe
-	$(PYTHON) src/server.py
+run-unit-tests: build/unit-tests
+	@echo "Running unit-tests"
+	@build/node_test.exe
+	@build/stack_test.exe
+	@build/queue_test.exe
+	@build/precedence_test.exe
+	@build/parse_test.exe
+	@build/calculate_test.exe
+	@build/cli_test.exe
+	@build/print_test.exe
 
-# Run python http server background and python gui
-run-app: build/app.exe
-	$(PYTHON) src/server.py & \
-	$(PYTHON) src/gui.py
-	$(MAKE) kill-server
+run-server: src/main.c venv src/server.py
+	@source $(VENV_ACTIVATE); $(PYTHON) src/server.py
 
-# Kill server if it online
-kill-server:
-	@SERVER_PID=$$(ps aux | grep "[p]ython.*src/server.py" | awk '{print $$2}'); \
-	if [ -n "$$SERVER_PID" ]; then \
-		echo "Stopping server (PID: $$SERVER_PID)..."; \
-		kill $$SERVER_PID; \
-	else \
-		echo "Server is not running."; \
-	fi
+run-gui: venv src/gui.py
+	@source $(VENV_ACTIVATE); $(PYTHON) src/gui.py
 
-# Create virtual environment if it doesn't exist
-venv: check-venv
-	@if [ ! -d "$(VENV_NAME)" ]; then \
-		echo "Creating virtual environment..."; \
-		$(PYTHON) -m venv $(VENV_NAME); \
-	fi
+build/app.exe: src/main.c
+	@echo "Building app.exe..."
+	@$(CC) $(CFLAGS) -o build/app.exe src/main.c
 
-run-integration-tests: build/app.exe install-deps
-	source $(VENV_NAME)/bin/activate; $(PYTEST) tests/integration/integrationTests.py
+build/app-test.o: src/main.o
+	@echo "Building app-test.o..."
+	@$(CC) $(CFLAGS) -DGTEST -c src/main.c -o build/app-test.o -g
 
-# Check if venv module is available
-check-venv:
-	@$(PYTHON) -c "import venv" 2>/dev/null || (echo "python3-venv not found. Installing..." && sudo apt update && sudo apt install -y python3-venv)
+venv:
+	@echo "Creating virtual environment..."
+	@$(PYTHON) -m venv $(VENV_DIR)
+	@source $(VENV_ACTIVATE); pip install --upgrade pip
+	@source $(VENV_ACTIVATE); pip install -U pytest
+	@source $(VENV_ACTIVATE); pip install -U structlog
+	@source $(VENV_ACTIVATE); pip install -U PySide6
+	@source $(VENV_ACTIVATE); pip install -U requests
 
-# Install dependencies in virtual environment
-install-deps: venv
-	@echo "Installing dependencies..."
-	@. $(VENV_ACTIVATE) && $(VENV_PIP) install --upgrade pip
-	@. $(VENV_ACTIVATE) && $(VENV_PIP) install pytest
+build/unit-tests: build/precedence_test.exe build/stack_test.exe build/queue_test.exe build/parse_test.exe build/calculate_test.exe build/cli_test.exe build/node_test.exe build/print_test.exe
 
-build/app.exe:
-	gcc src/main.c -o build/app.exe -Wall -Wextra -Wpedantic -Werror -std=c11
-
-build/app-test.o:
-	gcc -DGTEST -c src/main.c -o build/app-test.o
-
-build/unit-tests.exe: build/gtest/gtest_main.a build/app-test.o
-	g++ -isystem $(GTEST_DIR)/include -pthread \
-		tests/unit/validate_input_test.cpp \
+build/precedence_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/precedence_test.cpp
+	@echo "Building precedence unit-tests"
+	@g++ -isystem $(GTEST_DIR)/include -pthread \
+		tests/unit/precedence_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
-		-o build/unit-tests.exe
+		-o build/precedence_test.exe
+
+build/stack_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/stack_test.cpp
+	@echo "Building stack unit-tests"
+	@g++ -isystem $(GTEST_DIR)/include -pthread \
+		tests/unit/stack_test.cpp \
+		build/gtest/gtest_main.a build/app-test.o \
+		-o build/stack_test.exe
+
+build/node_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/node_test.cpp
+	@echo "Building node unit-tests"
+	@g++ -isystem $(GTEST_DIR)/include -pthread \
+		tests/unit/node_test.cpp \
+		build/gtest/gtest_main.a build/app-test.o \
+		-o build/node_test.exe
+
+build/cli_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/cli_test.cpp
+	@echo "Building cli unit-tests"
+	@g++ -isystem $(GTEST_DIR)/include -pthread \
+		tests/unit/cli_test.cpp \
+		build/gtest/gtest_main.a build/app-test.o \
+		-o build/cli_test.exe
+
+build/calculate_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/calculate_test.cpp
+	@echo "Building calculate unit-tests"
+	@g++ -isystem $(GTEST_DIR)/include -pthread \
+		tests/unit/calculate_test.cpp \
+		build/gtest/gtest_main.a build/app-test.o \
+		-o build/calculate_test.exe
+
+build/parse_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/parse_test.cpp
+	@echo "Building parse unit-tests"
+	@g++ -isystem $(GTEST_DIR)/include -pthread \
+		tests/unit/parse_test.cpp \
+		build/gtest/gtest_main.a build/app-test.o \
+		-o build/parse_test.exe -g
+
+build/queue_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/queue_test.cpp
+	@echo "Building queue unit-tests"
+	@g++ -isystem $(GTEST_DIR)/include -pthread \
+		tests/unit/queue_test.cpp \
+		build/gtest/gtest_main.a build/app-test.o \
+		-o build/queue_test.exe
+
+build/print_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/print_test.cpp
+	@echo "Building print unit-tests"
+	@g++ -isystem $(GTEST_DIR)/include -pthread \
+		tests/unit/print_test.cpp \
+		build/gtest/gtest_main.a build/app-test.o \
+		-o build/print_test.exe
+
 
 ####################################
 # BUILD GOOGLE TEST STATIC LIBRARY #
 ####################################
-
 # Google Test object files
 build/gtest/gtest-all.o: $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
-	g++ -isystem $(GTEST_DIR)/include -I$(GTEST_DIR) -c $(GTEST_DIR)/src/gtest-all.cc -o $@
+	@echo "Building gtest-all libraries..."
+	@g++ -isystem $(GTEST_DIR)/include -I$(GTEST_DIR) -c $(GTEST_DIR)/src/gtest-all.cc -o $@
 
 build/gtest/gtest_main.o: $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
-	g++ -isystem $(GTEST_DIR)/include -I$(GTEST_DIR) -c $(GTEST_DIR)/src/gtest_main.cc -o $@
+	@echo "Building gtest-main libraries.."
+	@g++ -isystem $(GTEST_DIR)/include -I$(GTEST_DIR) -c $(GTEST_DIR)/src/gtest_main.cc -o $@
 
 # Google Test static libraries
 build/gtest/gtest_main.a: build/gtest/gtest-all.o build/gtest/gtest_main.o
-	ar rv $@ $^ -o $@
+	@echo "Building gtest static libraries..."
+	@ar rv $@ $^ -o $@
