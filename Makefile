@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 GTEST_DIR := googletest/googletest
 GTEST_HEADERS := $(GTEST_DIR)/include/gtest/*.h $(GTEST_DIR)/include/gtest/internal/*.h
 CC := gcc
@@ -7,6 +8,7 @@ VENV_ACTIVATE := $(VENV_DIR)/bin/activate
 PYTHON := python3
 PYTEST = $(VENV_DIR)/bin/pytest
 
+# TODO: команда запускаа сервера в фоне и его убийства. клиентов тоже в фон
 $(shell mkdir -p build/gtest)
 # $(shell git clone https://github.com/google/googletest &> /dev/null)
 
@@ -20,7 +22,7 @@ clean:
 	@rm -rf $(VENV_DIR)
 	@rm -rf .pytest_cache
 	@rm -rf tests/integration/__pycache__
-	# @rm -rf googletest/
+# @rm -rf googletest/
 
 run-int: build/app.exe
 	@build/app.exe
