@@ -8,7 +8,7 @@ PYTHON := python3
 PYTEST = $(VENV_DIR)/bin/pytest
 
 $(shell mkdir -p build/gtest)
-$(shell git clone https://github.com/google/googletest &> /dev/null)
+# $(shell git clone https://github.com/google/googletest &> /dev/null)
 
 .PHONY: all clean run-int run-float run-unit-tests run-integration-tests build/unit-tests
 
@@ -20,6 +20,7 @@ clean:
 	@rm -rf $(VENV_DIR)
 	@rm -rf .pytest_cache
 	@rm -rf tests/integration/__pycache__
+	# @rm -rf googletest/
 
 run-int: build/app.exe
 	@build/app.exe
