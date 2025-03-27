@@ -8,7 +8,6 @@ VENV_ACTIVATE := $(VENV_DIR)/bin/activate
 PYTHON := python3
 PYTEST = $(VENV_DIR)/bin/pytest
 
-# TODO: команда запускаа сервера в фоне и его убийства. клиентов тоже в фон
 $(shell mkdir -p build/gtest)
 $(shell git clone https://github.com/google/googletest &> /dev/null)
 
