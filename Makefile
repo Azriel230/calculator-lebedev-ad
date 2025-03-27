@@ -48,10 +48,10 @@ run-gui: venv src/gui.py
 
 run-server: build/app.exe venv src/server/server.py
 	@make --no-print-directory kill-server
-	@source $(VENV_ACTIVATE); cd src/server; uvicorn server:app --port 8080
+	@source $(VENV_ACTIVATE); cd src/server; uvicorn server:app --port 8080 &
 
 kill-server:
-	@SERVER_PID=$$(ps aux | grep "[p]ython.*src/server/server.py" | awk '{print $$2}'); if [ -n "$$SERVER_PID" ]; then \
+	@SERVER_PID=$$(ps aux | grep "uvicorn server:app --port 8080" | awk '{print $$2}' | head -n 1); if [ -n "$$SERVER_PID" ]; then \
 		echo "Stopping server (PID: $$SERVER_PID)..."; \
 		kill $$SERVER_PID; \
 	fi
