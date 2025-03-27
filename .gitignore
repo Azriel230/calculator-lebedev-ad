@@ -1,6 +1,5 @@
 *.exe
 *.env
-*.sh
 googletest/
 build/
 .vscode

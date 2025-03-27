@@ -10,7 +10,7 @@ PYTEST = $(VENV_DIR)/bin/pytest
 
 # TODO: команда запускаа сервера в фоне и его убийства. клиентов тоже в фон
 $(shell mkdir -p build/gtest)
-# $(shell git clone https://github.com/google/googletest &> /dev/null)
+$(shell git clone https://github.com/google/googletest &> /dev/null)
 
 .PHONY: all clean run-int run-float run-unit-tests run-integration-tests build/unit-tests
 
@@ -22,7 +22,7 @@ clean:
 	@rm -rf $(VENV_DIR)
 	@rm -rf .pytest_cache
 	@rm -rf tests/integration/__pycache__
-# @rm -rf googletest/
+	@rm -rf googletest/
 
 run-int: build/app.exe
 	@build/app.exe
@@ -44,11 +44,18 @@ run-unit-tests: build/unit-tests
 	@build/cli_test.exe
 	@build/print_test.exe
 
-run-server: build/app.exe venv src/server.py
-	@source $(VENV_ACTIVATE); $(PYTHON) src/server.py
-
 run-gui: venv src/gui.py
-	@source $(VENV_ACTIVATE); $(PYTHON) src/gui.py
+	@source $(VENV_ACTIVATE); $(PYTHON) src/gui.py &
+
+run-server: build/app.exe venv src/server.py
+	@make --no-print-directory kill-server
+	@source $(VENV_ACTIVATE); $(PYTHON) src/server.py &
+
+kill-server:
+	@SERVER_PID=$$(ps aux | grep "[p]ython.*src/server.py" | awk '{print $$2}'); if [ -n "$$SERVER_PID" ]; then \
+		echo "Stopping server (PID: $$SERVER_PID)..."; \
+		kill $$SERVER_PID; \
+	fi
 
 build/app.exe: src/main.c
 	@echo "Building app.exe..."
@@ -124,7 +131,6 @@ build/print_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/print
 		tests/unit/print_test.cpp \
 		build/gtest/gtest_main.a build/app-test.o \
 		-o build/print_test.exe
-
 
 ####################################
 # BUILD GOOGLE TEST STATIC LIBRARY #
