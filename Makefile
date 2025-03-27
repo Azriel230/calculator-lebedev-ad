@@ -46,12 +46,12 @@ run-unit-tests: build/unit-tests
 run-gui: venv src/gui.py
 	@source $(VENV_ACTIVATE); $(PYTHON) src/gui.py &
 
-run-server: build/app.exe venv src/server.py
+run-server: build/app.exe venv src/server/server.py
 	@make --no-print-directory kill-server
-	@source $(VENV_ACTIVATE); $(PYTHON) src/server.py &
+	@source $(VENV_ACTIVATE); $(PYTHON) src/server/server.py &
 
 kill-server:
-	@SERVER_PID=$$(ps aux | grep "[p]ython.*src/server.py" | awk '{print $$2}'); if [ -n "$$SERVER_PID" ]; then \
+	@SERVER_PID=$$(ps aux | grep "[p]ython.*src/server/server.py" | awk '{print $$2}'); if [ -n "$$SERVER_PID" ]; then \
 		echo "Stopping server (PID: $$SERVER_PID)..."; \
 		kill $$SERVER_PID; \
 	fi
