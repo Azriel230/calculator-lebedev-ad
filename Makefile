@@ -47,8 +47,7 @@ run-gui: venv src/gui.py
 	@source $(VENV_ACTIVATE); $(PYTHON) src/gui.py &
 
 run-server: build/app.exe venv src/server/server.py
-	@make --no-print-directory kill-server
-	@source $(VENV_ACTIVATE); cd src/server; uvicorn server:app --port 8080 &
+	@source $(VENV_ACTIVATE); cd src/server; uvicorn server:app --port 8080
 
 kill-server:
 	@SERVER_PID=$$(ps aux | grep "uvicorn server:app --port 8080" | awk '{print $$2}' | head -n 1); if [ -n "$$SERVER_PID" ]; then \
@@ -73,6 +72,9 @@ venv:
 	@source $(VENV_ACTIVATE); pip install -U PySide6
 	@source $(VENV_ACTIVATE); pip install -U requests
 	@source $(VENV_ACTIVATE); pip install -U "fastapi[standard]"
+	@source $(VENV_ACTIVATE); pip install -U psycopg2-binary
+
+
 
 build/unit-tests: build/precedence_test.exe build/stack_test.exe build/queue_test.exe build/parse_test.exe build/calculate_test.exe build/cli_test.exe build/node_test.exe build/print_test.exe
 

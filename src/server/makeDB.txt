@@ -1,0 +1,7 @@
+Нужен докер, помойка этот ваш sql, makefile, python и остальные.
+Напишите это в консоле и будьте счастливы.
+
+create user server;
+create database calculator;
+Подключитесь к калькулятору и создайте таблицу;
+create table history (timeReq bigint, expr varchar(255), result varchar(255));
