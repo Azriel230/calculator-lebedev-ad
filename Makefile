@@ -32,18 +32,6 @@ run-float: build/app.exe
 run-integration-tests: build/app.exe venv tests/integration/integrationTests.py
 	@source $(VENV_ACTIVATE); $(PYTEST) tests/integration/integrationTests.py
 
-run-db-docker:
-	@/bin/bash ./src/server/scripts/pg_container_control.sh
-
-delete-db-container: stop-db-docker clean-db-data
-	@docker rm database
-
-stop-db-docker:
-	@docker stop database
-
-clean-db-data:
-	@sudo rm -rf dbdata/
-
 run-unit-tests: build/unit-tests
 	@echo "Running unit-tests"
 	@build/node_test.exe
@@ -67,14 +55,10 @@ kill-server:
 		kill $$SERVER_PID; \
 	fi
 
-build/app.exe: src/main.c
-	@echo "Building app.exe..."
-	@$(CC) $(CFLAGS) -o build/app.exe src/main.c
 
-build/app-test.o: src/main.c
-	@echo "Building app-test.o..."
-	@$(CC) $(CFLAGS) -DGTEST -c src/main.c -o build/app-test.o -g
-
+##########################################
+# PYTHON DEPENDENCIES FOR GUI AND SERVER #
+##########################################
 venv:
 	@echo "Creating virtual environment..."
 	@$(PYTHON) -m venv $(VENV_DIR)
@@ -87,8 +71,48 @@ venv:
 	@source $(VENV_ACTIVATE); pip install -U psycopg2-binary
 
 
+#########################################
+# DOCKER CONTAINER MANAGEMENT AND STUFF #
+#########################################
+
+run-server-docker: run-db-docker
+	@/bin/bash ./src/server/scripts/server_container_control.sh
+
+run-db-docker:
+	@/bin/bash ./src/server/scripts/pg_container_control.sh
+
+delete-db-container: stop-db-docker clean-db-data
+	@docker rm database
+
+stop-db-docker:
+	@docker stop database
+
+stop-server-docker:
+	@docker stop server
+	@docker stop database
+
+clean-db-data:
+	@sudo rm -rf dbdata/
+
+clean-all-containers:
+	@docker rm -vf $$(docker ps -aq)
+
+clean-all-images:
+	@docker rmi -f $$(docker images -aq)
+
+#########################################
+#      UNIT TEST BUILD TARGETS          #
+#########################################
+
+build/app.exe: src/main.c
+	@echo "Building app.exe..."
+	@$(CC) $(CFLAGS) -o build/app.exe src/main.c
 
 build/unit-tests: build/precedence_test.exe build/stack_test.exe build/queue_test.exe build/parse_test.exe build/calculate_test.exe build/cli_test.exe build/node_test.exe build/print_test.exe
+
+build/app-test.o: src/main.c
+	@echo "Building app-test.o..."
+	@$(CC) $(CFLAGS) -DGTEST -c src/main.c -o build/app-test.o -g
 
 build/precedence_test.exe: build/gtest/gtest_main.a build/app-test.o tests/unit/precedence_test.cpp
 	@echo "Building precedence unit-tests..."
