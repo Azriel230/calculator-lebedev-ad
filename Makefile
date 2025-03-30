@@ -32,6 +32,18 @@ run-float: build/app.exe
 run-integration-tests: build/app.exe venv tests/integration/integrationTests.py
 	@source $(VENV_ACTIVATE); $(PYTEST) tests/integration/integrationTests.py
 
+run-db-docker:
+	@/bin/bash ./src/server/scripts/pg_container_control.sh
+
+delete-db-container: stop-db-docker clean-db-data
+	@docker rm database
+
+stop-db-docker:
+	@docker stop database
+
+clean-db-data:
+	@sudo rm -rf dbdata/
+
 run-unit-tests: build/unit-tests
 	@echo "Running unit-tests"
 	@build/node_test.exe

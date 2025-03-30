@@ -2,6 +2,7 @@
 *.env
 googletest/
 build/
+dbdata/
 .vscode
 .qodo
 venv/

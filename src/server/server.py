@@ -1,3 +1,4 @@
+from PySide6.QtCore import QDateTime
 from logger import LOGGER
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -13,16 +14,14 @@ app = FastAPI()
 class CalcBody(BaseModel):
     expression: str
 
-
-
 @app.get("/")
 async def get_root():
     return
 
-
 @app.post("/calc")
 async def post_calc_handler(body: CalcBody, float: str | None = None):
     res = handle_calculate_errors(body.expression,float)
+    database.insert_history(HistoryInstance(timestamp=QDateTime.currentSecsSinceEpoch(),expression=body.expression,result=str(res)))
     return {"result": res}
 
 @app.get("/history")
