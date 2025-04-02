@@ -85,28 +85,28 @@ class ServerStatusWorker(QObject):
     def __init__(self):
         super().__init__()
         self._active = True
-        self.check_interval = 5  # seconds
+        self.check_interval = 5000 #через сколько отправлять запрос
+        self.current_time = 4000
 
     def run(self):
         while self._active:
-            start_time = time.time()
-            try:
-                response = requests.get("http://127.0.0.1:8080/", timeout=2)
-                if response.status_code == 200:
-                    self.status_updated.emit(200, "Сервер доступен", "")
-                else:
-                    self.status_updated.emit(
-                        response.status_code, 
-                        "Ошибка сервера", 
-                        f"HTTP {response.status_code}"
-                    )
-            except Exception as e:
-                self.status_updated.emit(500, "Сервер недоступен", str(e))
-            
-            # Точное ожидание с учетом времени выполнения запроса
-            elapsed = time.time() - start_time
-            sleep_time = max(0, self.check_interval - elapsed)
-            time.sleep(sleep_time)
+            if self.current_time > self.check_interval:
+                self.current_time = 0
+                try:
+                    response = requests.get("http://127.0.0.1:8080/", timeout=2)
+                    if response.status_code == 200:
+                        self.status_updated.emit(200, "Сервер доступен", "")
+                    else:
+                        self.status_updated.emit(
+                            response.status_code, 
+                            "Ошибка сервера", 
+                            f"HTTP {response.status_code}"
+                        )
+                except Exception as e:
+                    self.status_updated.emit(500, "Сервер недоступен", str(e))
+            else:
+                time.sleep(0.050)
+                self.current_time = self.current_time + 50
 
     def stop(self):
         self._active = False
@@ -149,7 +149,7 @@ class CalculationWorker(QObject):
                 self.calculation_finished.emit(True, str(result), "")
                 self.update_history()
             else:
-                error = response.json().get("error", "Неизвестная ошибка")
+                error = response.json().get("detail", "Неизвестная ошибка")
                 print("ERROR CALC", error)
                 self.calculation_finished.emit(False, f"Ошибка: {error}", f"HTTP {response.status_code}")
         except Exception as e:
