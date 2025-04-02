@@ -3,7 +3,7 @@ if [[ -z $(docker images -a | grep "server") ]]; then
 fi
 
 if [[ -z $(docker ps -a | grep "server") ]]; then
-  docker run --network host server -d
+  docker run --network host -d server
 else
   docker start server
 fi
