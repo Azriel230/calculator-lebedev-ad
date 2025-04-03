@@ -1,0 +1,25 @@
+services:
+  server:
+    build: ./
+    container_name: server
+    ports:
+      - 8080:8080
+      - 8888:8888
+      - 65432:65432
+    network_mode: host
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    container_name: database
+    environment:
+      POSTGRES_PASSWORD: ${DBPASSWORD}
+      POSTGRES_USER: ${DBUSER}
+      POSTGRES_DB: ${DBNAME}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${DBPORT}:5432"
+    volumes:
+      - ./dbdata:/var/lib/postgresql/data
+      - ./src/server/scripts/sql:/docker-entrypoint-initdb.d
