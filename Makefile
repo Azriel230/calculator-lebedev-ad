@@ -74,6 +74,8 @@ venv:
 #########################################
 # DOCKER CONTAINER MANAGEMENT AND STUFF #
 #########################################
+run-compose:
+	docker compose --env-file src/server/.env up
 
 run-server-docker: run-db-docker
 	@/bin/bash ./src/server/scripts/server_container_control.sh
