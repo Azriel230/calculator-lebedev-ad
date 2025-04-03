@@ -10,3 +10,4 @@ venv/
 __pycache__/
 *.log
 logs/
+mock_client.py
