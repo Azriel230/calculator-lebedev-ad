@@ -20,9 +20,13 @@ RUN set -ex && \
     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/lto-wrapper && \
     rm -f /usr/bin/x86_64-alpine-linux-musl-gcj
 
+RUN rm /app/gui.py
+
 EXPOSE 8888
 
 EXPOSE 8080
+
+EXPOSE 65432
 
 CMD . venv/bin/activate; cd /app/server/; uvicorn server:app --port 8080
 

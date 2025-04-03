@@ -14,6 +14,7 @@ from tcpserver import TCPServer
 HISTORY_SERVER = TCPServer()
 logger = LOGGER
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     HISTORY_SERVER.run()
@@ -27,6 +28,7 @@ app = FastAPI(lifespan=lifespan)
 class CalcBody(BaseModel):
     expression: str
 
+
 @app.get("/")
 async def get_root():
     return
@@ -36,12 +38,20 @@ async def get_root():
 async def post_calc_handler(body: CalcBody, float: str | None = None):
     res = handle_calculate_errors(body.expression, float)
     h = HistoryInstance(
-            timestamp=int(datetime.datetime.now().timestamp()),
-            expression=body.expression,
-            result=str(res),
-        )
+        timestamp=int(datetime.datetime.now().timestamp()),
+        expression=body.expression,
+        result=str(res),
+    )
     database.insert_history(h)
-    HISTORY_SERVER.send_message(json.dumps(h))
+    HISTORY_SERVER.send_message(
+        json.dumps(
+            {
+                "timestamp": h.timestamp,
+                "expression": h.expression,
+                "result": h.result,
+            }
+        )
+    )
     return {"result": res}
 
 

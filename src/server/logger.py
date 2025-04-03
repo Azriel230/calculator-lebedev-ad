@@ -16,6 +16,7 @@ LOG_DIR = os.path.join(PROJECT_ROOT, "logs")
 if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR)
 
+
 # Настройка structlog для логирования в консоль и в файл
 def setup_logging():
     # Настройка structlog
@@ -23,9 +24,11 @@ def setup_logging():
         processors=[
             structlog.stdlib.add_log_level,  # Добавляет уровень логирования
             structlog.processors.StackInfoRenderer(),  # Добавляет информацию о стеке
-            structlog.processors.TimeStamper(fmt="iso"), # Добавляет временную метку в формате iso
-            structlog.processors.format_exc_info, # Добавляет информацию об исключениях
-            structlog.stdlib.ProcessorFormatter.wrap_for_formatter, # Подготавливает данные для форматирования
+            structlog.processors.TimeStamper(
+                fmt="iso"
+            ),  # Добавляет временную метку в формате iso
+            structlog.processors.format_exc_info,  # Добавляет информацию об исключениях
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,  # Подготавливает данные для форматирования
         ],
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
@@ -36,21 +39,30 @@ def setup_logging():
 
     # Обработчик для вывода в консоль
     console_handler = logging.StreamHandler()
-    console_handler.setFormatter(structlog.stdlib.ProcessorFormatter(
-        processor=structlog.dev.ConsoleRenderer(colors=True),
-    ))
+    console_handler.setFormatter(
+        structlog.stdlib.ProcessorFormatter(
+            processor=structlog.dev.ConsoleRenderer(colors=True),
+        )
+    )
 
     # Путь к файлу логов
     log_file_path = os.path.join(LOG_DIR, "server.log")
 
     # Настройка logging для записи в файл
     file_handler = logging.handlers.RotatingFileHandler(
-        log_file_path, maxBytes=1024 * 1024, backupCount=5  # Логи ротируются при достижении 1 МБ
+        log_file_path,
+        maxBytes=1024 * 1024,
+        backupCount=5,  # Логи ротируются при достижении 1 МБ
     )
-    file_handler.setFormatter(structlog.stdlib.ProcessorFormatter(processor=structlog.processors.JSONRenderer()))
+    file_handler.setFormatter(
+        structlog.stdlib.ProcessorFormatter(
+            processor=structlog.processors.JSONRenderer()
+        )
+    )
 
     main_logger.addHandler(console_handler)
     main_logger.addHandler(file_handler)
+
 
 setup_logging()
 LOGGER = structlog.get_logger()

@@ -1,16 +1,13 @@
 import socket
 import os
-import json
 import threading
 
 from dotenv import load_dotenv
 
-from database import HistoryInstance
-
-
 load_dotenv("./.env")
 HOST = os.getenv("SERVERHOST", "127.0.0.1")
 PORT = os.getenv("SERVERPORT", 65432)
+
 
 class TCPServer:
 
@@ -52,11 +49,11 @@ class TCPServer:
             except Exception as e:
                 print(f"Error accepting connection: {e}")
 
-    def send_message(self,message: str):
+    def send_message(self, message: str):
         dead_clients = []
 
         with self.lock:
-            for client  in self.clients:
+            for client in self.clients:
                 try:
                     client.sendall(message.encode("utf-8"))
                 except Exception as e:
@@ -69,4 +66,4 @@ class TCPServer:
                     client.close()
                     self.clients.remove(client)
                 except ValueError:
-                    pass # already removed
+                    pass  # already removed

@@ -15,7 +15,7 @@ def select_history() -> list[HistoryInstance]:
     try:
         load_dotenv("./.env")
         conn = psycopg2.connect(
-            port=os.getenv("DBPORT",8888),
+            port=os.getenv("DBPORT", 8888),
             dbname=os.getenv("DBNAME", "calculator"),
             user=os.getenv("DBUSER", "server"),
             host=os.getenv("DBHOST", "localhost"),
@@ -38,7 +38,7 @@ def insert_history(h: HistoryInstance):
     try:
         load_dotenv("./.env")
         conn = psycopg2.connect(
-            port=os.getenv("DBPORT",8888),
+            port=os.getenv("DBPORT", 8888),
             dbname=os.getenv("DBNAME", "calculator"),
             user=os.getenv("DBUSER", "server"),
             host=os.getenv("DBHOST", "localhost"),
