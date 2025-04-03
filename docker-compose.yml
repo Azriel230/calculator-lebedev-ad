@@ -9,6 +9,14 @@ services:
     network_mode: host
     depends_on:
       - postgres
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
 
   postgres:
     image: postgres:latest
@@ -23,3 +31,19 @@ services:
     volumes:
       - ./dbdata:/var/lib/postgresql/data
       - ./src/server/scripts/sql:/docker-entrypoint-initdb.d
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DBUSER} -d ${DBNAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
