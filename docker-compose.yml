@@ -1,6 +1,6 @@
 services:
   server:
-    image: nekoch4n/calculator-server
+    image: nekoch4n/calculator-server:main
     build: ./
     container_name: server
     ports:
