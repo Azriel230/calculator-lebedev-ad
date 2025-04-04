@@ -422,9 +422,9 @@ class MainWindow(QMainWindow):
         try:
             message = data.decode('utf-8')
             data_json = json.loads(message)
-            self.status_bar.showMessage(f"Получено сообщение: {message}", 5000)
+            # self.status_bar.showMessage(f"Получено сообщение: {message}", 5000)
             # Здесь можно добавить обработку полученных данных
-            # self.insert_history_table([data_json])
+            self.insert_history_table([data_json])
         except UnicodeDecodeError:
             self.status_bar.showMessage("Получены бинарные данные", 3000)
 
