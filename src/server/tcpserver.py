@@ -1,7 +1,7 @@
 import socket
 import os
 import threading
-
+from logger import LOGGER
 from dotenv import load_dotenv
 
 load_dotenv("./.env")
@@ -27,6 +27,8 @@ class TCPServer:
         accept_thread = threading.Thread(target=self._accept_connections)
         accept_thread.daemon = True
         accept_thread.start()
+        LOGGER.info("TCP: Server started",port=os.getenv("TCPSERVERPORT",65432),host=os.getenv("TCPSERVERHOST","localhost"))
+
 
     def stop(self):
         self.running = False
@@ -36,18 +38,21 @@ class TCPServer:
             for client in self.clients:
                 client.close()
             self.clients.clear()
+        LOGGER.info("TCP: Server stoped")
+
 
     def _accept_connections(self):
         while self.running:
             try:
                 client_socket, addr = self.server_socket.accept()
-                print(f"New connection from {addr}")
+                LOGGER.info("TCP: New connection",addr=addr)
                 with self.lock:
                     self.clients.append(client_socket)
-            except OSError:
+            except OSError:                
                 break
             except Exception as e:
-                print(f"Error accepting connection: {e}")
+                LOGGER.error("TCP: Error accepting connection",detail=e)
+
 
     def send_message(self, message: str):
         dead_clients = []
@@ -57,12 +62,12 @@ class TCPServer:
                 try:
                     client.sendall(message.encode("utf-8"))
                 except Exception as e:
-                    print(f"Error sending message: {e}")
+                    LOGGER.warning("TCP: Error sending message",detail=e)
                     dead_clients.append(client)
 
             for client in dead_clients:
                 try:
-                    print(f"Removing client: {client}")
+                    LOGGER.warning("TCP: Removing client",client=client)
                     client.close()
                     self.clients.remove(client)
                 except ValueError:
