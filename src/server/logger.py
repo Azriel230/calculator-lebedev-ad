@@ -19,16 +19,24 @@ if not os.path.exists(LOG_DIR):
 
 # Настройка structlog для логирования в консоль и в файл
 def setup_logging():
+
+    logging.getLogger("uvicorn.error").disabled=True
+    logging.getLogger("uvicorn.access").disabled=True
+
+
+
+
     # Настройка structlog
     structlog.configure(
         processors=[
+            structlog.contextvars.merge_contextvars,
             structlog.stdlib.add_log_level,  # Добавляет уровень логирования
             structlog.processors.StackInfoRenderer(),  # Добавляет информацию о стеке
             structlog.processors.TimeStamper(
                 fmt="iso"
             ),  # Добавляет временную метку в формате iso
             structlog.processors.format_exc_info,  # Добавляет информацию об исключениях
-            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,  # Подготавливает данные для форматирования
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,  # Подготавливает данные для форматирования  
         ],
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
@@ -41,7 +49,7 @@ def setup_logging():
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(
         structlog.stdlib.ProcessorFormatter(
-            processor=structlog.dev.ConsoleRenderer(colors=True),
+            processor=structlog.dev.ConsoleRenderer(colors=True,pad_event=0)
         )
     )
 
@@ -62,6 +70,8 @@ def setup_logging():
 
     main_logger.addHandler(console_handler)
     main_logger.addHandler(file_handler)
+
+
 
 
 setup_logging()
