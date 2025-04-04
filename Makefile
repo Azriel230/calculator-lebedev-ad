@@ -78,10 +78,10 @@ run-compose:
 	docker compose --env-file src/server/.env up
 
 run-server-docker: run-db-docker
-	@/bin/bash ./src/server/scripts/server_container_control.sh
+	@source src/server/.env; /bin/bash ./src/server/scripts/server_container_control.sh
 
 run-db-docker:
-	@/bin/bash ./src/server/scripts/pg_container_control.sh
+	@source src/server/.env; /bin/bash ./src/server/scripts/pg_container_control.sh
 
 delete-db-container: stop-db-docker clean-db-data
 	@docker rm database
