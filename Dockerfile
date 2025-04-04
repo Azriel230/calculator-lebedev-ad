@@ -1,7 +1,5 @@
 FROM python:3.13-alpine
 
-COPY ./src/ /app
-
 WORKDIR /app
 
 ENV DBPASSWORD=$DBPASSWORD
@@ -11,6 +9,8 @@ ENV DBHOST=$DBHOST
 ENV DBPORT=$DBPORT
 ENV SERVERHOST=$SERVERHOST
 ENV SERVERPORT=$SERVERPORT
+
+COPY ./src/ /app
 
 RUN set -ex && \
     apk add --no-cache gcc musl-dev
