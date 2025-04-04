@@ -66,3 +66,4 @@ def handle_calculate_errors(expr: str, isFloat) -> str | int | float:
             case _:
                 raise HTTPException(status_code=500, detail="unknown calculator error")
     return res
+
