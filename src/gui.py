@@ -422,7 +422,6 @@ class MainWindow(QMainWindow):
         try:
             message = data.decode('utf-8')
             data_json = json.loads(message)
-            print('msg', message)
             self.status_bar.showMessage(f"Получено сообщение: {message}", 5000)
             # Здесь можно добавить обработку полученных данных
             # self.insert_history_table([data_json])
